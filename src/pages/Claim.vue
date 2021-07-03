@@ -79,8 +79,8 @@
 
 
                 <div class="wrap-avatar">
-                    <div class="avatar claim-btn" @click="startClaim()" v-bind:class="{'disable-btn': !canClaim}">
-                        <q-icon size="md" style="margin-top: -50px; margin-bottom: 15px;" v-bind:class="{'hide': canClaim}">
+                    <div class="avatar" @click="canClaim ? startClaim() : null" :class="canClaim ? 'claim-btn' : 'claim-btn-off disable-btn'">
+                        <q-icon size="md" style="margin-top: -50px; margin-bottom: 15px;" :class="{'hide': canClaim}">
                             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                                 <g>
                                     <g>
@@ -349,6 +349,11 @@ $panel-width: 360px;
 
 .claim-btn{
     cursor:pointer;
+    .st0{fill:#FFFFFF;}
+}
+
+.claim-btn-off{
+    cursor:not-allowed;
     .st0{fill:#FFFFFF;}
 }
 
