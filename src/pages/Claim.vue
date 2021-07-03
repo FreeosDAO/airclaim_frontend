@@ -253,11 +253,9 @@ export default {
     computed: {
         ...mapGetters('freeos', ['isRegistered', 'isFreeosEnabled', 'totalFreeos', 'liquidFreeos', 'liquidOptions', 'canClaim', 'reasonCannotClaim', 'currentIteration']),
         nextClaimDescription: function () {
-            const dateEnd =  Math.floor(Date.parse(this.currentIteration.end + "Z") / 1000);
-            const currentTimeStamp = Math.floor(Date.parse(new Date().toISOString()) / 1000);
-            var daysToNextClaim = this.secondsToDhms(dateEnd - currentTimeStamp);
-
-            return daysToNextClaim
+            const dateEnd = new Date(`${this.currentIteration.end}Z`) // Z = zero UTC offset
+            const currentTimeStamp = Date.now()
+            return this.secondsToDhms((dateEnd - currentTimeStamp) / 1e3);
         },
         notes: function () {
             return this.currentIteration ? ('Week ' + this.currentIteration.iteration_number) : ''
@@ -299,25 +297,19 @@ export default {
             console.log('claim', result)
         },
         secondsToDhms(seconds) {
-            seconds = Number(seconds);
-            var d = Math.floor(seconds / (3600 * 24));
-            var h = Math.floor(seconds % (3600 * 24) / 3600);
-            var m = Math.floor(seconds % 3600 / 60);
-            var s = Math.floor(seconds % 60);
+            const d = Math.floor(seconds / (3600 * 24));
+            const h = Math.floor(seconds % (3600 * 24) / 3600);
+            const m = Math.floor(seconds % 3600 / 60);
 
-            var dDisplay = d > 0 ? d + (d == 1 ? " d, " : " d") : "";
-            var hDisplay = h > 0 ? h + (h == 1 ? " h, " : " h") : "";
-            var mDisplay = m > 0 ? m + (m == 1 ? " min, " : " mins") : "";
+            const dDisplay = d ? `${d} d` : "";
+            const hDisplay = h ? `${h} h` : "";
+            const mDisplay = m ? `${m} min${m !== 1 ? "s" : ""}` : "";
 
-            if(dDisplay && hDisplay){
-                return dDisplay + ", " + hDisplay
-            }else if(hDisplay){
-                return hDisplay
-            }else if(dDisplay){
-               return dDisplay
-            }else{
-               return mDisplay
-            }
+            let timeToNextClaim = "";
+            if(dDisplay) timeToNextClaim = dDisplay;
+            if(hDisplay) timeToNextClaim = timeToNextClaim + (dDisplay ? ", " : "") + hDisplay;
+            if(mDisplay && !dDisplay) timeToNextClaim = timeToNextClaim + (hDisplay ? ", " : "") + mDisplay;
+            return timeToNextClaim;
         }
 
 
