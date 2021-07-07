@@ -83,10 +83,9 @@ export async function connectProton (state, name) {
 }
 
 export const logout = async function ({ commit }) {
-  commit('clearAccount', null)
+  await commit('clearAccount', null)
   await ProtonSDK.logout()
   console.log("PUSH", this.$router)
-  this.$router.push({ path: '/' })
   // this.$router.push('/')
 }
 

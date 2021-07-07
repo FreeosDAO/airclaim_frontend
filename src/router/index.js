@@ -34,7 +34,7 @@ export default function ({ store }) {
     // Leave these as they are and change in quasar.conf.js instead!
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
-    mode: 'history',
+    mode: process.env.VUE_ROUTER_MODE,
     base: process.env.VUE_ROUTER_BASE
   })
 

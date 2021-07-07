@@ -14,7 +14,7 @@
         size="lg"
         outline
          color="primary"
-        v-if="!isAuthenticated" @click="connectWallet('anchor')"
+        @click="connectWallet('anchor')"
         >Connect Wallet</q-btn>
       </div>
       <div class="q-mt-xs q-mb-sm" v-if="isFreeosEnabled === false">
@@ -22,7 +22,6 @@
               <h4 class="text-white">The AirClaim is unavailable at this time, please try later </h4>
         </div>
       </div>
-
       <div class="q-mt-lg" style="">
         <img src="../assets/join-screen-image.svg" alt="">
       </div>
@@ -35,12 +34,12 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 export default {
   name: 'PageIndex',
   computed: {
-   // ...mapGetters('account', ['isAuthenticated']),
-    ...mapGetters('freeos', ['isFreeosEnabled','isAuthenticated'])
+    //...mapGetters('account', ['isAuthenticated']),
+    ...mapGetters('freeos', ['isFreeosEnabled', 'isAuthenticated'])
   },
   methods: {
     ...mapActions('account', ['checkIfLoggedIn', 'connectWallet', 'logout', 'getAccountInfo', 'getClaimDetailInfo']),
-    ...mapActions('freeos', ['fetch', 'monitorBlockChain'])
+    ...mapActions('freeos', ['fetch'])
   },
   watch: {
     isAuthenticated: {
@@ -52,7 +51,7 @@ export default {
                 if( this.$route.query.returnUrl){
                   this.$router.push({ path: this.$route.query.returnUrl })
                 }else{
-                  //this.$router.push({ path: '/claim' })
+                  this.$router.push({ path: '/claim' })
                 }
           }
       },

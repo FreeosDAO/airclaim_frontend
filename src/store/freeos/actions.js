@@ -11,7 +11,6 @@ import { isFreeosEnabled } from './getters'
  */
 export async function monitorBlockChain (state) {
   FreeosBlockChainState.getInstance().on('change', (data) => {
-    console.log('data is now', data)
     if (data) {
       for (const key in data) {
         if (data.hasOwnProperty(key)) {
@@ -37,7 +36,7 @@ export async function monitorBlockChain (state) {
   })
 }
 export async function fetch(state) {
-  var result = await FreeosBlockChainState.getInstance().fetch()
+  var result = await FreeosBlockChainState.getInstance().singleFetch()
   // Result of claim Error: assertion failure with message: user is not eligible to claim in this iteration
   console.log('setisFreeosEnabled', result)
    return result;
@@ -105,11 +104,3 @@ export async function unvest() {
   console.log('Result of unvest', result)
 }
 
-
-export async function logout() {
-  var result = await FreeosBlockChainState.getInstance().logout()
-      console.log(this.$router)
-  this.$router.push({path: '/' })
-
-  console.log('Result of logout', result)
-}

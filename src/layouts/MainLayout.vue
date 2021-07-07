@@ -8,7 +8,7 @@
           <div></div>
         </q-btn>
         <div style="display: flex; align-items: center;margin-top:-3px;">
-          <span class="q-mr-sm">v{{appVersion}}</span> <q-btn style="margin-right:-6px;" no-caps @click="accountURL()"  v-if="isAuthenticated">{{accountName}}</q-btn><span style="height:10px;border-right:1px solid #eee;"></span><q-btn  style="margin-left:-6px;" no-caps v-if="isAuthenticated" @click="logout()">Logout</q-btn>
+          <span class="q-mr-sm">v{{appVersion}}</span> <q-btn style="margin-right:-6px;" no-caps @click="accountURL()"  v-if="isAuthenticated">{{accountName}}</q-btn><span style="height:10px;border-right:1px solid #eee;"></span><q-btn  style="margin-left:-6px;" no-caps v-if="isAuthenticated" @click="logoutSubmit()">Logout</q-btn>
         </div>
       </q-toolbar>
     </q-header>
@@ -30,7 +30,7 @@
         <q-list>
          <q-separator />
           <template v-for="(menuItem, index) in menuList">
-            <q-item v-if="!menuItem.displayCondition || !menuItem.displayCondition()" :key="index" clickable :active="selectedItemLabel === menuItem.label" active-class="bg-grey-4" v-ripple @click="onSelectMenu(menuItem)">
+            <q-item v-if="!handleFunctionCall(menuItem.displayCondition)" :key="index" clickable :active="selectedItemLabel === menuItem.label" active-class="bg-grey-4" v-ripple @click="onSelectMenu(menuItem)">
                 <q-item-section avatar style="    align-items: center;">
                   <!-- <q-icon :name="menuItem.icon" /> -->
                   <img :src="menuItem.icon" alt="menu-icon">
@@ -91,7 +91,7 @@ const menuList = [
     icon: require('@/assets/stack.svg'),
     label: 'Stake',
     separator: true,
-    displayCondition: function(){return stakeRequirement === 0},
+    displayCondition: "showStake",
     route: '/stake'
   },
   {
@@ -126,13 +126,26 @@ export default {
     ...mapGetters('freeos', ['user', 'isAuthenticated', 'accountName', 'stakeRequirement', 'isFreeosEnabled']),
     appVersion: function () {
       return process.env.APP_VERSION
-    }
+    },
   },
   components: {
     // Balance
   },
    methods: {
     ...mapActions('freeos', ['monitorBlockChain']),
+    async logoutSubmit(){
+      await this.logout();
+    },
+    handleFunctionCall(functionName) {
+        console.log(functionName)
+        if(functionName)
+          return this[functionName]()
+        else
+          return false
+    },
+    showStake: function () {
+       return this.stakeRequirement === 0
+    },
     accountURL (){
       window.open(process.env.ACCOUNT_URL + this.accountName, '_blank');
     },
@@ -161,6 +174,13 @@ export default {
   watch: {
     isFreeosEnabled: {
       immediate: true,
+      handler: function(val, oldVal) {
+          if(val===false){
+            this.$router.push({path:'/'})
+          }
+      },
+    },
+    isAuthenticated: {
       handler: function(val, oldVal) {
           if(val===false){
             this.$router.push({path:'/'})

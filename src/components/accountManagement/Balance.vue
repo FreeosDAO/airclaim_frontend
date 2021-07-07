@@ -65,7 +65,7 @@ export default {
         ...mapGetters('freeos', ['XPRBalance', 'liquidOptions', 'userStake', 'liquidFreeos', 'totalFreeos', 'canUnvest', 'vestedOptions', 'stakeRequirement', 'unvestPercentage'])
     },
     methods: {
-        ...mapActions('freeos', ['monitorBlockChain', 'unvest']),
+        ...mapActions('freeos', ['unvest']),
         async submit() {
             var result = await this.unvest();
         },

@@ -65,7 +65,7 @@ class ProtonSDK {
   logout = async () => {
     console.log('this.requestAccount',this.requestAccount);
     if (this.session && this.session.auth) await this.link.removeSession(this.requestAccount, this.session.auth)
-    await FreeosBlockChainState.getInstance().fetch();
+    await FreeosBlockChainState.getInstance().singleFetch();
   }
 
   restoreSession = async () => {

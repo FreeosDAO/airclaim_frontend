@@ -2,6 +2,9 @@
 import {
   EventEmitter
 } from 'events'
+
+
+
 const {
   JsonRpc
 } = require('eosjs')
@@ -15,6 +18,7 @@ import {
   Notify
 } from 'quasar'
 import ProtonSDK from '../utils/proton'
+import definition from '../store/freeos/definition'
 
 function connect (config) {
   return rpc.get_table_rows(config)
@@ -48,6 +52,7 @@ export class FreeosBlockChainState extends EventEmitter {
    * Starts monitor for changes on the block chain
    */
   start () {
+    console.log('  var isRunning = false', this.isRunning);
     if (this.isRunning) return
 
     this.isRunning = true
@@ -67,13 +72,14 @@ export class FreeosBlockChainState extends EventEmitter {
         console.log('NOW WALLET USER IS: ', this.walletUser)
 
         this.actionFetch().then((data) => {
+          console.log('changedata', data);
           this.emit('change', data)
           if (this.timer) clearTimeout(this.timer)
-          this.timer = setTimeout(fetchTimer, 775000)
+          this.timer = setTimeout(fetchTimer, process.env.TIMED_FETCH_DELAY)
         }).catch(err => {
           console.log('Problem fetching data', err)
           if (this.timer) clearTimeout(this.timer)
-          this.timer = setTimeout(fetchTimer, 775000)
+          this.timer = setTimeout(fetchTimer, process.env.TIMED_FETCH_DELAY)
         })
       })
     }
@@ -163,7 +169,24 @@ export class FreeosBlockChainState extends EventEmitter {
     }
   }
 
-  
+  async singleFetch (){
+      await ProtonSDK.restoreSession().then((auth) => {
+        console.log('Wallet session restored', auth)
+
+        this.setWalletUser({
+          accountName: (auth ? auth.auth.actor : null),
+          walletId: ProtonSDK && ProtonSDK.link ? ProtonSDK.link.walletType : null
+        })
+
+
+        this.actionFetch().then((data) => {
+          console.log('changedata', data);
+          this.emit('change', data)
+        }).catch(err => {
+          console.log('Problem fetching data', err)
+        })
+      })
+  }
 
   async unstake () {
     console.log('unstake')
@@ -193,9 +216,8 @@ async cancelUnstake () {
 
 
 async logout() {
-    this.setWalletUser({})
-    await ProtonSDK.logout();
-    await this.fetch();
+    await this.setWalletUser({})
+    await this.singleFetch();
 }
 
 
@@ -245,7 +267,7 @@ async logout() {
 
     var dataRequests = [currentIterationPromise, bcStatisticsPromise, bcStateRequirementsPromise]
 
-    if (this.walletUser) {
+    if (this.walletUser && this.walletUser.accountName) {
       bcUnvestsPromise = this.getRecord(process.env.AIRCLAIM_CONTRACT, 'unvests', this.walletUser.accountName)
 
 
@@ -357,19 +379,19 @@ async logout() {
     var output = {
       currencyName: currencyName,
       liquidOptions: liquidOptions,
-      currentIteration: iterations.currentIteration,
+      currentIteration: iterations && iterations.currentIteration ? iterations.currentIteration : null,
       nextIteration: iterations.nextIteration,
       user: bcUser,
       accountName: this.walletUser.accountName,
       isAuthenticated: this.walletUser.accountName && this.walletUser.accountName !== '' ? true : false,
-      isRegistered: bcUser != null,
+      isRegistered: bcUser !== null ? true : false, 
       statistics: bcStatistics,
       unvests: bcUnvests,
       unvestPercentage: bcStatistics && bcStatistics.unvestpercent ? bcStatistics.unvestpercent : 0,
       canUnvest: canUnvest,
       bcStateRequirements,
       isFreeosEnabled: isFreeosEnabled,
-      XPRBalance: bcXPRBalance,
+      XPRBalance: bcXPRBalance ? bcXPRBalance : null,
       bcUnstaking,
       unstakingIteration: unstakingIteration,
       vestedOptions,

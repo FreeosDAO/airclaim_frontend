@@ -258,24 +258,24 @@ export default {
             return this.secondsToDhms((dateEnd - currentTimeStamp) / 1e3);
         },
         notes: function () {
-            return this.currentIteration ? ('Week ' + this.currentIteration.iteration_number) : ''
+            return this.currentIteration && this.currentIteration.iteration_number ? ('Week ' + this.currentIteration.iteration_number) : ''
         },
         registerModalTrigger: {
             get () {
                 return (this.isRegistered === false && this.registerModalOverride === true)
             },
-            set (value) {
+            async set (value) {
                 console.log(value);
                 this.registerModalOverride = value;
-                if(!this.isRegistered){
+                if(this.isRegistered === false){
                     console.log("LOGOUT");
-                    this.logout();
+                    await this.logout();
                 }
             }
         },
     },
     methods: {
-        ...mapActions('freeos', ['monitorBlockChain', 'fetch', 'register', 'claim', 'currentIteration']),
+        ...mapActions('freeos', ['fetch', 'register', 'claim']),
         ...mapActions('account', ['logout']),
         toggleTerms(){
             this.showTerms = !this.showTerms;
@@ -285,24 +285,26 @@ export default {
             //await this.fetch()
         },
         async startClaim() {
-            const _ = this;
-            var result = await _.claim()
-            //this.claimWatch = vm.$watch('liquidFreeos', function(newValue, oldValue) {
-            //alert('The first name was changed from ' + oldValue.firstName + ' to ' + newValue.firstName + '!');
-            //if(newValue > oldValue){
-            //_.claimWatch();
-            this.$refs.complete.openDialog({
-                  title: "Wahoo!", subtitle: "You earned", value: this.currentIteration.claim_amount
-            });
-            console.log('claim', result)
+            if(this.canClaim){
+                const _ = this;
+                var result = await _.claim()
+                //this.claimWatch = vm.$watch('liquidFreeos', function(newValue, oldValue) {
+                //alert('The first name was changed from ' + oldValue.firstName + ' to ' + newValue.firstName + '!');
+                //if(newValue > oldValue){
+                //_.claimWatch();
+                this.$refs.complete.openDialog({
+                    title: "Wahoo!", subtitle: "You earned", value: this.currentIteration.claim_amount
+                });
+                console.log('claim', result)
+            }
         },
         secondsToDhms(seconds) {
             const d = Math.floor(seconds / (3600 * 24));
             const h = Math.floor(seconds % (3600 * 24) / 3600);
             const m = Math.floor(seconds % 3600 / 60);
 
-            const dDisplay = d ? `${d} d` : "";
-            const hDisplay = h ? `${h} h` : "";
+            const dDisplay = d ? `${d} day${d !== 1 ? "s" : ""}` : "";
+            const hDisplay = h ? `${h} hr${h !== 1 ? "s" : ""}` : "";
             const mDisplay = m ? `${m} min${m !== 1 ? "s" : ""}` : "";
 
             let timeToNextClaim = "";
@@ -311,8 +313,6 @@ export default {
             if(mDisplay && !dDisplay) timeToNextClaim = timeToNextClaim + (hDisplay ? ", " : "") + mDisplay;
             return timeToNextClaim;
         }
-
-
     },
     async created () {
 

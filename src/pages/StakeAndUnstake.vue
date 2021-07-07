@@ -19,9 +19,9 @@
                 <div class="panel panel-warning q-pa-lg text-center q-mb-lg q-pa-lg" v-if="bcUnstaking">
                     <p class="q-mb-md text-h4 text-warning" style="line-height:1.2;">Warning</p>
                     <p class="q-mb-xs text-subtitle1" style="line-height:1.2;"><strong>You have unstaked</strong></p>
-                    <h4 class="text-h4 q-mt-none q-mb-sm" style="line-height:1;">{{stakeRequirement}} {{stakeCurrency}}</h4>
+                    <h4 class="text-h4 q-mt-none q-mb-sm" style="line-height:1;">{{userStake}} {{stakeCurrency}}</h4>
                     <p class="q-mb-md text-subtitle1" style="line-height:1.4;">Your will NOT be eligible to Claim your weekly OPTIONS in the next iteration. You need a minimum {{stakeRequirement}} {{stakeCurrency}} to Claim. This can be rectified by cancelling the process if you wish</p>
-                    <p class="q-mb-sm text-subtitle1" style="line-height:1.4;">You are currently unstaking {{stakeRequirement}} {{stakeCurrency}}. The unstaking will complete in <strong class="text-primary">{{stakeIterationMsg}}</strong></p>
+                    <p class="q-mb-sm text-subtitle1" style="line-height:1.4;">You are currently unstaking {{userStake}} {{stakeCurrency}}. The unstaking will complete in <strong class="text-primary">{{stakeIterationMsg}}</strong></p>
                  <p class="q-mb-md" style="line-height:1.4;">For more info, <router-link to="/info#unstaking">click here</router-link></p>
                     <q-btn unelevated outline color="primary" v-if="isAuthenticated" @click="cancelSubmit()">Cancel Unstaking</q-btn>
 
@@ -47,7 +47,7 @@
                 </div>
 
 
-                <div class="panel panel-warning q-pa-lg text-center q-mb-lg q-pa-lg" v-if="userHasStaked && !bcUnstaking">
+                <div class="panel panel-warning q-pa-lg text-center q-mb-lg q-pa-lg" v-if="userHasStaked && !bcUnstaking && stakeRequirement > 0">
                     <p class="q-mb-md text-h4" style="line-height:1.2;">Unstake</p>
                     <p class="text-subtitle1 q-mb-xs" style="line-height:1.4;"><strong>This process will complete at the start of the next Claim</strong> also if you unstake you will NOT be eligible to Claim your weekly OPTIONS. </p>
                      <p class="q-mb-md" style="line-height:1.4;">For more info, <router-link to="/info#unstaking">click here</router-link></p>
@@ -159,7 +159,7 @@ export default {
               }
 
                 this.$refs.complete.openDialog({
-                  title: "Unstaked", subtitle: "You've unstaked", value: this.stakeRequirement, currency: process.env.STAKING_CURRENCY
+                  title: "Unstaked", subtitle: "You've unstaked", value: this.userStake, currency: process.env.STAKING_CURRENCY
                 });
               return result
             } catch (e) {
@@ -179,7 +179,7 @@ export default {
                 this.$refs.complete.openDialog({
                   title: "Cancel Unstaking", 
                   subtitle: "You've cancelled Unstaking", 
-                  value: this.stakeRequirement,
+                  value: this.userStake,
                   currency: process.env.STAKING_CURRENCY
                 });
 
@@ -208,16 +208,16 @@ export default {
 
             var dDisplay = d > 0 ? d + (d == 1 ? " day" : " days") : "";
             var hDisplay = h > 0 ? h + (h == 1 ? " hour" : " hours") : "";
-            var mDisplay = m > 0 ? m + (m == 1 ? " min, " : " mins") : "";
+            var mDisplay = m > 0 ? m + (m == 1 ? " min" : " mins") : "";
 
             if(dDisplay && hDisplay){
                 return dDisplay + ", " + hDisplay
             }else if(hDisplay){
-                return hDisplay
+                return hDisplay + ", " + mDisplay
             }else if(dDisplay){
                return dDisplay
             }else{
-               return mDisplay
+               return "0 hours " + mDisplay
             }
         }
 
