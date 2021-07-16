@@ -1,5 +1,5 @@
 <template>
-<div class="q-pa-md">
+<div class="q-pa-md">    <CompleteDialog  ref="complete"  />
     <div class="q-gutter-y-md q-mx-auto" style="max-width: 600px">
 
         <div class="panel-wrap">
@@ -26,7 +26,7 @@
                 </div>
                 <div style="align-items: center;" class="row justify-center q-mb-md q-pb-none">
 
-                        <q-btn size="lg" unelevated no-caps outline :disable="!sendAmount && sendAmount > 0 && sendAmount <= liquidOptions" color="primary" v-if="isAuthenticated" @click="submit()">Convert to {{currencyName}}</q-btn>
+                        <q-btn size="lg" unelevated no-caps outline :disable="!sendAmount || sendAmount > liquidOptions" color="primary" v-if="isAuthenticated" @click="submit()">Convert to {{currencyName}}</q-btn>
 
 
 
@@ -49,9 +49,14 @@ import {
 import {
   getAbsoluteAmount
 } from '@/utils/currency'
+import CompleteDialog from 'src/components/CompleteDialog.vue'
+
 
 export default {
   name: 'ConvertOptions',
+    components: {
+        CompleteDialog
+    },
   data () {
     return {
       sendAmount: null,
@@ -66,6 +71,14 @@ export default {
     ...mapActions('freeos', ['convertOptions']),
     async submit () {
       var result = await this.convertOptions({owner: this.accountName, quantity: `${parseFloat(this.sendAmount).toFixed(process.env.TOKEN_PRECISION)} OPTION`})
+      
+        if(!(result instanceof Error)){
+            this.$refs.complete.openDialog({
+                    title: "Wahoo!", subtitle: "You converted", value: this.sendAmount, currency: "OPTIONS"
+             });
+        } 
+      
+      
       console.log('resultR', result)
       this.resetForm()
     },

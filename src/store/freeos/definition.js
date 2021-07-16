@@ -7,7 +7,7 @@ var definition = {
   unvests: null,
   canUnvest: null,
   bcStateRequirements: null,
-
+  airkeyBalance: null, 
   XPRBalance: null,
   bcUnstaking: null,
   vestedOptions: null,

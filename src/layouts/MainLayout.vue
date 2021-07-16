@@ -24,7 +24,7 @@
       <q-scroll-area class="fit"
         style="box-shadow: 5px 5px #000;"
       >
-      <div class="flex justify-end q-pr-lg q-pt-lg q-mb-sm">
+      <div class="flex justify-end q-pr-md q-pt-sm q-pb-sm">
         <q-icon class="cursor-pointer" style="font-size:2rem" name="close" @click="drawer = !drawer"/>
       </div>
         <q-list>
@@ -123,7 +123,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('freeos', ['user', 'isAuthenticated', 'accountName', 'stakeRequirement', 'isFreeosEnabled']),
+    ...mapGetters('freeos', ['user', 'isAuthenticated', 'accountName', 'stakeRequirement', 'isFreeosEnabled', 'userHasStaked', 'userStake']),
     appVersion: function () {
       return process.env.APP_VERSION
     },
@@ -137,14 +137,13 @@ export default {
       await this.logout();
     },
     handleFunctionCall(functionName) {
-        console.log(functionName)
         if(functionName)
           return this[functionName]()
         else
           return false
     },
     showStake: function () {
-       return this.stakeRequirement === 0
+       return this.stakeRequirement === 0 || (this.userHasStaked && this.userStake === 0)
     },
     accountURL (){
       window.open(process.env.ACCOUNT_URL + this.accountName, '_blank');
@@ -263,6 +262,7 @@ $panel-width: 360px;
     border-radius: $panel-border-radius;
     padding-bottom: 45px;
     margin-bottom: -20px;
+    margin-top: 4px;
 }
 
 

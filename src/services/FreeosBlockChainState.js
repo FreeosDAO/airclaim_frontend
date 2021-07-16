@@ -98,6 +98,10 @@ export class FreeosBlockChainState extends EventEmitter {
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'reguser')
   }
 
+  async reregister() {
+      return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'reverify')
+  }
+
   async convertOptions(sendData) {
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'convert', sendData)
   }

@@ -31,9 +31,9 @@ export default {
         ...mapGetters('freeos', ['accountName', 'XPRBalance', 'liquidFreeos', 'isAuthenticated']),
     },
     methods: {
-        ...mapActions('freeos', ['register']),
+        ...mapActions('freeos', ['reregister']),
         async submit() {
-            var result = await this.register();
+            var result = await this.reregister();
             console.log('registerResult', result)
             if(result){
 

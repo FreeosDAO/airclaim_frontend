@@ -14,7 +14,7 @@
             <div class=" text-h6">{{XPRBalance || '0'}}</div>
         </div>
 
-        <div v-if="stakeRequirement > 0" class="flex justify-between q-mb-md">
+        <div v-if="!(this.stakeRequirement === 0 || (this.userHasStaked && this.userStake === 0))" class="flex justify-between q-mb-md">
             <div class="flex items-center text-h6">
                 Staked {{stakeCurrency}}:                 
                 <q-btn class="small-icon q-mt-sm q-ml-sm">
@@ -35,14 +35,15 @@
 
         <div class="flex justify-between q-mb-md">
             <div class="flex items-center  text-h6">
-               Vested OPTIONS:
+               Locked OPTIONS:
             </div>
             <div class="col-5 text-h6">{{vestedOptions || '0'}}</div>
-            <div class="flex"><small class="q-mr-auto">For more info on Vested OPTIONS <router-link to="/info#vested-options">click here</router-link></small></div>
-            <q-btn :disable="!canUnvest || !vestedOptions" class="q-mt-lg" unelevated no-caps size="lg" outline @click="submit()" color="primary"><span>Unvest<span v-if="unvestPercentage && canUnvest && vestedOptions"> {{unvestPercentage}}%</span></span></q-btn>
+            <div class="flex"><small class="q-mr-auto">For more info on Locked OPTIONS <router-link to="/info#vested-options">click here</router-link></small></div>
+            <q-btn :disable="!canUnvest || !vestedOptions" class="q-mt-lg" unelevated no-caps size="lg" outline @click="submit()" color="primary"><span>Unlock<span v-if="unvestPercentage && canUnvest && vestedOptions"> {{unvestPercentage}}%</span></span></q-btn>
         </div>
 
     </div>
+        <CompleteDialog  ref="complete"  />
     <!-- <balance-vest /> -->
 </div>
 </template>
@@ -54,6 +55,7 @@ import {
     mapActions
 } from 'vuex'
 import BalanceVest from './BalanceVest'
+import CompleteDialog from 'src/components/CompleteDialog.vue'
 export default {
     data() {
         return {
@@ -62,16 +64,25 @@ export default {
         }
     },
     computed: {
-        ...mapGetters('freeos', ['XPRBalance', 'liquidOptions', 'userStake', 'liquidFreeos', 'totalFreeos', 'canUnvest', 'vestedOptions', 'stakeRequirement', 'unvestPercentage'])
+        ...mapGetters('freeos', ['XPRBalance', 'liquidOptions', 'userStake', 'liquidFreeos', 'totalFreeos', 'canUnvest', 'vestedOptions', 'stakeRequirement', 'unvestPercentage', 'userHasStaked', 'userStake']),
+        unvestedAmount:function(){
+            return this.vestedOptions && this.unvestPercentage ? (this.unvestPercentage / 100) * this.vestedOptions : 0;
+        }
     },
     methods: {
         ...mapActions('freeos', ['unvest']),
         async submit() {
             var result = await this.unvest();
+              if(!(result instanceof Error)){
+                this.$refs.complete.openDialog({
+                  title: "Unlocked", subtitle: "You Unlocked", value: this.unvestedAmount, currency: "OPTIONS"
+                });
+              }
         },
     },
     components: {
-        BalanceVest
+        BalanceVest,
+        CompleteDialog
     }
 
 }

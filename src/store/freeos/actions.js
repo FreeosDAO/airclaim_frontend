@@ -56,6 +56,12 @@ export async function register () {
   // Result of claim Error: assertion failure with message: user is not eligible to claim in this iteration
   return result;
 }
+export async function reregister() {
+  var result = await FreeosBlockChainState.getInstance().reregister()
+  // Result of claim Error: assertion failure with message: user is not eligible to claim in this iteration
+  return result;
+}
+
 
 export async function claim () {
   var result = await FreeosBlockChainState.getInstance().claim()

@@ -120,74 +120,31 @@ export default {
         },
         async stakeSubmit() {
             const _ = this;
-            try {
-  
               var result = await _.stake(_.stakeRequirement)
-              let responseMessage = result.processed.action_traces[0].console
-              console.log('resultR', result)
-              if (!responseMessage) {
-                responseMessage = 'Transfer successfully'
+                if(!(result instanceof Error)){
+                this.$refs.complete.openDialog({
+                  title: "Great Stake", subtitle: "You staked", value: this.stakeRequirement, currency: process.env.STAKING_CURRENCY
+                });
               }
-
-                _.dialogTitle = "Great Stake";
-                _.dialogSubtitle = "You staked";
-                _.dialogValue = _.stakeRequirement;
-                _.showCompleteDialog = true;
-                //_.claimWatch();
-
-                console.log('claim', result)
-
-
-
-              return result
-            } catch (e) { 
-              Notify.create({
-                message: e,
-                color: 'negative'
-              })
-              console.log(e);             
-              return e
-            }
         },
         async unstakeSubmit() {
-            try {  
               var result = await this.unstake()
-              let responseMessage = result.processed.action_traces[0].console
-              console.log('resultR', result)
-              if (!responseMessage) {
-                responseMessage = 'Transfer successfully'
-              }
-
+              if(!(result instanceof Error)){
                 this.$refs.complete.openDialog({
                   title: "Unstaked", subtitle: "You've unstaked", value: this.userStake, currency: process.env.STAKING_CURRENCY
                 });
-              return result
-            } catch (e) {
-              console.log(e);    
-              return e
-            }
+              }
         },
         async cancelSubmit() {
-            try {  
-              var result = await this.cancelUnstake()
-              let responseMessage = result.processed.action_traces[0].console
-              console.log('resultR', result)
-              if (!responseMessage) {
-                responseMessage = 'Cancel Unstake successfully'
-              }
-
-                this.$refs.complete.openDialog({
-                  title: "Cancel Unstaking", 
-                  subtitle: "You've cancelled Unstaking", 
-                  value: this.userStake,
-                  currency: process.env.STAKING_CURRENCY
-                });
-
-              return result
-            } catch (e) {
-              console.log(e);    
-              return e
-            }
+                var result = await this.cancelUnstake()
+                if(!(result instanceof Error)){
+                  this.$refs.complete.openDialog({
+                    title: "Cancel Unstaking", 
+                    subtitle: "You've cancelled Unstaking", 
+                    value: this.userStake,
+                    currency: process.env.STAKING_CURRENCY
+                  });
+                }
         },
         setCountdown(){
             const t = this;
