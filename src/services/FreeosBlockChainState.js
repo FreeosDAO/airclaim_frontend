@@ -288,13 +288,13 @@ async logout() {
         lower_bound: this.walletUser.accountName
       })
       optionsPromise = this.getUserRecordAsNumber(process.env.AIRCLAIM_CONTRACT, 'accounts', {
-        upper_bound: 'OPTION',
-        lower_bound: 'OPTION',
+        upper_bound:  process.env.TOKEN_CURRENCY_NAME,
+        lower_bound:  process.env.TOKEN_CURRENCY_NAME,
         limit: 1
       }, 'balance')
       bcVestaccountsPromise = this.getUserRecordAsNumber(process.env.AIRCLAIM_CONTRACT, 'vestaccounts', {
-        upper_bound: 'OPTION',
-        lower_bound: 'OPTION',
+        upper_bound: process.env.TOKEN_CURRENCY_NAME,
+        lower_bound: process.env.TOKEN_CURRENCY_NAME,
         limit: 1
       }, 'balance')
       bcFreeosBalancePromise = this.getUserRecordAsNumber(process.env.FREEOSTOKENS_CONTRACT, 'accounts', {

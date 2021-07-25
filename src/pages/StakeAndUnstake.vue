@@ -12,7 +12,7 @@
 
                 <div v-if="!bcUnstaking && !userHasStaked">
                     <p class="text-center q-mb-xs">With Freeos unverified users will need a minimum amount in their account to Claim. For more info, <router-link to="/info#staking">click here</router-link>.</p>
-                    <p class="text-center q-mb-xs">In order to Claim your weekly {{tokenCurrencyName}}, you need to stake </p>
+                    <p class="text-center q-mb-xs">In order to Claim your weekly {{tokenCurrencyName}}s, you need to stake </p>
                     <h4 class="text-center text-h4 q-ma-none q-mb-lg" style="line-height:1;">{{stakeRequirement}} {{stakeCurrency}}</h4>
                 </div>
 
