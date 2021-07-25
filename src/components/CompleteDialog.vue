@@ -38,7 +38,7 @@ export default {
                 title: "Woohoo", 
                 subtitle: null,
                 value: 0, 
-                currency: process.env.CURRENCY_NAME
+                currency: process.env.TOKEN_CURRENCY_NAME
             }
         }
     },
