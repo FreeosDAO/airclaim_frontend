@@ -8,7 +8,7 @@ class ProtonSDK {
     this.chainId = process.env.NETWORK_CHAIN_ID
     this.endpoints = [process.env.APP_CHAIN_ENDPOINT] // Multiple for fault tolerance
     this.appName = 'Freeos'
-    // this.requestAccount = 'taskly' // optional
+    this.requestAccount = process.env.AIRCLAIM_CONTRACT // optional
     this.session = null
     this.link = null
   }
@@ -25,8 +25,19 @@ class ProtonSDK {
         backButton: true
       },
       selectorOptions: {
-        appName: this.appName
-        // appLogo: TasklyLogo
+        appName: this.appName,
+        appLogo: process.env.APP_LOGO,
+        customStyleOptions: {
+          /* Optional: Custom style options for modal */
+          modalBackgroundColor: '#00a1ed',
+          logoBackgroundColor: 'white',
+          isLogoRound: true,
+          optionBackgroundColor: '#0091dd',
+          optionFontColor: 'white',
+          primaryFontColor: 'white',
+          secondaryFontColor: '#eee',
+          linkColor: '#eee'
+        }
       }
     })
     this.link = link

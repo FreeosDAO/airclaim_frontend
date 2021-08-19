@@ -108,5 +108,6 @@ export async function convertOptions({ state }, submitData) {
 export async function unvest() {
   var result = await FreeosBlockChainState.getInstance().unvest()
   console.log('Result of unvest', result)
+  return result;
 }
 

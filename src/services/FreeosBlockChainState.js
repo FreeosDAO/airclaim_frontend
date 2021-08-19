@@ -34,8 +34,6 @@ export class FreeosBlockChainState extends EventEmitter {
       FreeosBlockChainState.sInstance = sInstance = new FreeosBlockChainState()
     }
 
-    console.log('sInstance.isRunning', sInstance.isRunning)
-
     return sInstance
   }
 
@@ -56,7 +54,6 @@ export class FreeosBlockChainState extends EventEmitter {
     if (this.isRunning) return
 
     this.isRunning = true
-    console.log('Starting...')
 
     var fetchTimer = () => {
       console.log('Fetching data....')
@@ -111,8 +108,6 @@ export class FreeosBlockChainState extends EventEmitter {
 
 
   async sendTransaction (contractAccountName, contractName, extraData) {
-    console.log('extraData', extraData)
-
     var accountName = this.walletUser ? this.walletUser.accountName : null
     var actionData = {}
 
@@ -154,7 +149,6 @@ export class FreeosBlockChainState extends EventEmitter {
   }
 
   async transfer (sendData) {
-    console.log('sendData', sendData)
     var contract = process.env.FREEOSTOKENS_CONTRACT
     if (sendData.token === process.env.STAKING_CURRENCY) {
       contract = process.env.STAKING_CURRENCY_CONTRACT
@@ -174,7 +168,6 @@ export class FreeosBlockChainState extends EventEmitter {
 
   async singleFetch (){
       await ProtonSDK.restoreSession().then((auth) => {
-        console.log('Wallet session restored', auth)
 
         this.setWalletUser({
           accountName: (auth ? auth.auth.actor : null),
@@ -183,7 +176,6 @@ export class FreeosBlockChainState extends EventEmitter {
 
 
         this.actionFetch().then((data) => {
-          console.log('changedata', data);
           this.emit('change', data)
         }).catch(err => {
           console.log('Problem fetching data', err)
@@ -192,18 +184,15 @@ export class FreeosBlockChainState extends EventEmitter {
   }
 
   async unstake () {
-    console.log('unstake')
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unstake')
   }
 
   async unvest() {
-    console.log('unstake')
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unvest')
   }
 
 
 async cancelUnstake () {
-  console.log('cancelUnstake')
   return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unstakecncl')
 }
 
@@ -226,7 +215,6 @@ async logout() {
 
 
   async actionFetch () {
-    console.log('state.state.accountName', this.walletUser ? this.walletUser.accountName : 'N/A')
 
     var masterswitch = await this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'parameters', null, {
       lower_bound: 'masterswitch',
@@ -238,7 +226,7 @@ async logout() {
 
     // Row data
     // {"iteration_number":1,"start":"2021-04-27T22:59:59.000","end":"2021-04-28T04:00:00.000","claim_amount":100,"tokens_required":0}
-    var currentIterationPromise = await this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'iterations')
+    var currentIterationPromise = await this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'iterations', process.env.AIRCLAIM_CONFIGURATION_CONTRACT, {'limit':100})
 
 
 
@@ -255,7 +243,7 @@ async logout() {
     // Currently empty
     var bcUnvestsPromise = this.getRecord(process.env.AIRCLAIM_CONTRACT, 'unvests', )
 
-    var bcStateRequirementsPromise = this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'stakereqs')
+    var bcStateRequirementsPromise = this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'stakereqs', process.env.AIRCLAIM_CONFIGURATION_CONTRACT, {'limit':100})
 
     var bcXPRBalancePromise = null
     var bcUnstakingPromise = null
@@ -370,7 +358,7 @@ async logout() {
         if (currentIterationIdx <= 0) {
           reasonCannotClaim = "<div class='text-h5 text-negative'>Airclaim Not Started</div>"
         } else if (!userMeetsHoldingRequirement) {
-          reasonCannotClaim = 'Opps! In order to Claim you need a minimum ' + iterations.currentIteration.tokens_required + " " + process.env.TOKEN_CURRENCY_NAME + " in your Wallet. Please <a href='/transfer'>transfer</a> an additional " + (iterations.currentIteration.tokens_required - totalHolding) + ' ' + currencyName + ' in order to Claim'
+          reasonCannotClaim = 'Oops! In order to Claim you need a minimum ' + iterations.currentIteration.tokens_required + " " + process.env.TOKEN_CURRENCY_NAME + " in your Wallet. Please <a href='/transfer'>transfer</a> an additional " + (iterations.currentIteration.tokens_required - totalHolding) + ' ' + currencyName + ' in order to Claim'
         } else if (userClaimedAlready) {
           reasonCannotClaim = '<div class="text-h5 text-primary">You have already claimed</div>'
         } else if (!userMeetsStakeRequirement) {
@@ -482,7 +470,6 @@ async logout() {
   }
 
   getCurrentAndNextIteration (rows) {
-    console.log('getCurrentAndNextIteration', rows)
 
     const currentTimeStamp = Math.floor(Date.parse(new Date().toISOString()) / 1000); // Math.floor((new Date()).getTime() / 1000)
     var nextIteration = {

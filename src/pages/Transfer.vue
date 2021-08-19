@@ -84,7 +84,6 @@
             </q-card>
 
         </div>
-     
     </div>
 </div>
 </template>
@@ -140,7 +139,8 @@ export default {
             dataToSubmit.from = this.accountName;
             var tokenPrecision = this.submitData.token === this.currencyName ? process.env.TOKEN_PRECISION : process.env.STAKING_CURRENCY_PRECISION;
             dataToSubmit.quantity = `${parseFloat(this.submitData.quantity).toFixed(tokenPrecision)} ${this.submitData.token}`
-            var result = await this.transfer(this.submitData)
+                        console.log('dataToSubmit', dataToSubmit)
+            var result = await this.transfer(dataToSubmit)
             console.log('resultR', result)
             this.resetForm()
         },

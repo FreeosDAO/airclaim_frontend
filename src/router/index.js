@@ -39,9 +39,6 @@ export default function ({ store }) {
   })
 
   Router.beforeEach((to, from, next) => {
-    console.log('to', to);
-    console.log('store', store);
-
     if (to.matched.some(record => record.meta.RrequiresAuth)) {
       if (store.getters['freeos/isAuthenticated']) {
         next()

@@ -123,10 +123,10 @@ export default {
             const _ = this;
               var result = await _.stake(_.stakeRequirement)
                 if(!(result instanceof Error)){
-                this.$refs.complete.openDialog({
-                  title: "Great Stake", subtitle: "You staked", value: this.stakeRequirement, currency: process.env.STAKING_CURRENCY
-                });
-              }
+                    this.$refs.complete.openDialog({
+                    title: "Great Stake", subtitle: "You staked", value: this.stakeRequirement, currency: process.env.STAKING_CURRENCY
+                    });
+                  }
         },
         async unstakeSubmit() {
               var result = await this.unstake()
