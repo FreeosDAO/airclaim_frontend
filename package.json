@@ -13,8 +13,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@proton/web-sdk": "^3.3.6",
-    "@protonprotocol/proton-web-sdk": "https://github.com/ProtonProtocol/ProtonWeb",
+    "@proton/web-sdk": "^2.7.23",
     "@quasar/extras": "^1.0.0",
     "@quasar/quasar-app-extension-dotenv": "^1.0.5",
     "axios": "^0.21.1",
@@ -28,7 +27,6 @@
     "eos-transit-tokenpocket-provider": "^3.0.1",
     "eosjs": "^21.0.3",
     "quasar": "^1.0.0",
-    "root": "github:ProtonProtocol/ProtonWeb",
     "vue-sanitize": "^0.2.1"
   },
   "devDependencies": {
