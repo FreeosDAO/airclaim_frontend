@@ -84,7 +84,6 @@ export default {
 
       if (this.freeosState) {
         var output = await this.freeosState.register()
-        console.log('Register', output)
         alert(JSON.stringify(output))
       }
     }

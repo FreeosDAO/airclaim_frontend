@@ -69,12 +69,13 @@ export async function connectProton (state, name) {
   try {
     // this.setState({ isLoggingIn: true })
     const { auth } = await ProtonSDK.login()
+    console.log('contec', auth);
     if (auth && auth.actor && auth.permission) {
       state.commit('setAccount', {
         accountName: auth.actor,
         walletId: ProtonSDK.link.walletType
       })
-      // setLoggedInState(auth.actor, auth.permission, accountData)
+      // setLoggedInState(auth.actor, auth.permission)
     }
     // this.setState({ isLoggingIn: false })
   } catch (e) {

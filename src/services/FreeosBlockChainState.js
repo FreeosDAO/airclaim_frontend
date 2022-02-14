@@ -20,73 +20,71 @@ import {
 import ProtonSDK from '../utils/proton'
 import definition from '../store/freeos/definition'
 
-function connect (config) {
+function connect(config) {
   return rpc.get_table_rows(config)
 }
 
 export class FreeosBlockChainState extends EventEmitter {
   static sInstance = null;
 
-  static getInstance () {
+  static getInstance() {
     var sInstance = FreeosBlockChainState.sInstance
 
     if (!sInstance) {
       FreeosBlockChainState.sInstance = sInstance = new FreeosBlockChainState()
     }
 
-    console.log('sInstance.isRunning', sInstance.isRunning)
-
     return sInstance
   }
 
-  constructor () {
+  constructor() {
     super()
     this.start()
   }
 
-  setWalletUser (walletUser) {
+  setWalletUser(walletUser) {
     this.walletUser = walletUser
   }
 
   /**
    * Starts monitor for changes on the block chain
    */
-  start () {
+  async start() {
     console.log('  var isRunning = false', this.isRunning);
     if (this.isRunning) return
 
     this.isRunning = true
-    console.log('Starting...')
 
-    var fetchTimer = () => {
+    var fetchTimer = async () => {
       console.log('Fetching data....')
 
-      ProtonSDK.restoreSession().then((auth) => {
-        console.log('Wallet session restored', auth)
+      const { auth } = await ProtonSDK.restoreSession();
 
-        this.setWalletUser({
-          accountName: (auth ? auth.auth.actor : null),
-          walletId: ProtonSDK && ProtonSDK.link ? ProtonSDK.link.walletType : null
-        })
+      console.log('Wallet session restored', auth)
 
-        console.log('NOW WALLET USER IS: ', this.walletUser)
-
-        this.actionFetch().then((data) => {
-          console.log('changedata', data);
-          this.emit('change', data)
-          if (this.timer) clearTimeout(this.timer)
-          this.timer = setTimeout(fetchTimer, process.env.TIMED_FETCH_DELAY)
-        }).catch(err => {
-          console.log('Problem fetching data', err)
-          if (this.timer) clearTimeout(this.timer)
-          this.timer = setTimeout(fetchTimer, process.env.TIMED_FETCH_DELAY)
-        })
+      this.setWalletUser({
+        accountName: (auth ? auth.actor : null),
+        walletId: ProtonSDK && ProtonSDK.link ? ProtonSDK.link.walletType : null
       })
+
+      console.log('NOW WALLET USER IS: ', this.walletUser)
+
+      this.actionFetch().then((data) => {
+        console.log('changedata', data);
+        this.emit('change', data)
+        if (this.timer) clearTimeout(this.timer)
+        this.timer = setTimeout(fetchTimer, process.env.TIMED_FETCH_DELAY)
+      }).catch(err => {
+        console.log('Problem fetching data', err)
+        if (this.timer) clearTimeout(this.timer)
+        this.timer = setTimeout(fetchTimer, process.env.TIMED_FETCH_DELAY)
+      })
+
     }
     fetchTimer()
   }
 
-  stop () {
+  stop() {
     this.isRunning = false
     if (this.timer) {
       clearTimeout(this.timer)
@@ -94,12 +92,12 @@ export class FreeosBlockChainState extends EventEmitter {
     }
   }
 
-  async register () {
+  async register() {
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'reguser')
   }
 
   async reregister() {
-      return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'reverify')
+    return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'reverify')
   }
 
   async convertOptions(sendData) {
@@ -110,9 +108,7 @@ export class FreeosBlockChainState extends EventEmitter {
 
 
 
-  async sendTransaction (contractAccountName, contractName, extraData) {
-    console.log('extraData', extraData)
-
+  async sendTransaction(contractAccountName, contractName, extraData) {
     var accountName = this.walletUser ? this.walletUser.accountName : null
     var actionData = {}
 
@@ -149,22 +145,20 @@ export class FreeosBlockChainState extends EventEmitter {
     }
   }
 
-  async claim () {
+  async claim() {
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'claim')
   }
 
-  async transfer (sendData) {
-    console.log('sendData', sendData)
+  async transfer(sendData) {
     var contract = process.env.FREEOSTOKENS_CONTRACT
     if (sendData.token === process.env.STAKING_CURRENCY) {
-      contract = process.env.CURRENCY_CONTRACT
+      contract = process.env.STAKING_CURRENCY_CONTRACT
     }
-    sendData.quantity = `${parseFloat(sendData.quantity).toFixed(process.env.TOKEN_PRECISION)} ${sendData.token}`
     delete sendData.token
     return this.sendTransaction(contract, 'transfer', sendData)
   }
 
-  async fetch () {
+  async fetch() {
     try {
       this.stop()
       this.actionFetch()
@@ -173,61 +167,55 @@ export class FreeosBlockChainState extends EventEmitter {
     }
   }
 
-  async singleFetch (){
-      await ProtonSDK.restoreSession().then((auth) => {
-        console.log('Wallet session restored', auth)
+  async singleFetch() {
+    const { auth } = await ProtonSDK.restoreSession()
 
-        this.setWalletUser({
-          accountName: (auth ? auth.auth.actor : null),
-          walletId: ProtonSDK && ProtonSDK.link ? ProtonSDK.link.walletType : null
-        })
+    this.setWalletUser({
+      accountName: (auth ? auth.actor : null),
+      walletId: ProtonSDK && ProtonSDK.link ? ProtonSDK.link.walletType : null
+    })
 
 
-        this.actionFetch().then((data) => {
-          console.log('changedata', data);
-          this.emit('change', data)
-        }).catch(err => {
-          console.log('Problem fetching data', err)
-        })
-      })
+    this.actionFetch().then((data) => {
+      this.emit('change', data)
+    }).catch(err => {
+      console.log('Problem fetching data', err)
+    })
+
   }
 
-  async unstake () {
-    console.log('unstake')
+  async unstake() {
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unstake')
   }
 
   async unvest() {
-    console.log('unstake')
     return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unvest')
   }
 
 
-async cancelUnstake () {
-  console.log('cancelUnstake')
-  return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unstakecncl')
-}
+  async cancelUnstake() {
+    return this.sendTransaction(process.env.AIRCLAIM_CONTRACT, 'unstakecncl')
+  }
 
 
-  async stake (stakeRequirement) {
+  async stake(stakeRequirement) {
     var sendData = {}
     sendData.from = this.walletUser ? this.walletUser.accountName : null
     sendData.to = process.env.AIRCLAIM_CONTRACT
     sendData.memo = 'freeos stake'
-    sendData.quantity = `${parseFloat(stakeRequirement).toFixed(process.env.TOKEN_PRECISION)} ` + process.env.STAKING_CURRENCY || 'XPR'
-    return this.sendTransaction(process.env.CURRENCY_CONTRACT, 'transfer', sendData)
+    sendData.quantity = `${parseFloat(stakeRequirement).toFixed(process.env.STAKING_CURRENCY_PRECISION)} ` + process.env.STAKING_CURRENCY || 'XPR'
+    return this.sendTransaction(process.env.STAKING_CURRENCY_CONTRACT, 'transfer', sendData)
   }
 
 
-async logout() {
+  async logout() {
     await this.setWalletUser({})
     await this.singleFetch();
-}
+  }
 
 
 
-  async actionFetch () {
-    console.log('state.state.accountName', this.walletUser ? this.walletUser.accountName : 'N/A')
+  async actionFetch() {
 
     var masterswitch = await this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'parameters', null, {
       lower_bound: 'masterswitch',
@@ -239,11 +227,11 @@ async logout() {
 
     // Row data
     // {"iteration_number":1,"start":"2021-04-27T22:59:59.000","end":"2021-04-28T04:00:00.000","claim_amount":100,"tokens_required":0}
-    var currentIterationPromise = await this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'iterations')
+    var currentIterationPromise = await this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'iterations', process.env.AIRCLAIM_CONFIGURATION_CONTRACT, { 'limit': 100 })
 
 
 
-    if (currentIterationPromise && !Array.isArray(currentIterationPromise)){
+    if (currentIterationPromise && !Array.isArray(currentIterationPromise)) {
       var newcurrentIterationPromise = [];
       newcurrentIterationPromise.push(currentIterationPromise);
       currentIterationPromise = newcurrentIterationPromise;
@@ -254,9 +242,9 @@ async logout() {
     // {"usercount":36,"claimevents":58,"unvestpercent":0,"unvestpercentiteration":1,"iteration":1,"failsafecounter":1}
     var bcStatisticsPromise = this.getRecord(process.env.AIRCLAIM_CONTRACT, 'statistics')
     // Currently empty
-    var bcUnvestsPromise = this.getRecord(process.env.AIRCLAIM_CONTRACT, 'unvests', )
+    var bcUnvestsPromise = this.getRecord(process.env.AIRCLAIM_CONTRACT, 'unvests',)
 
-    var bcStateRequirementsPromise = this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'stakereqs')
+    var bcStateRequirementsPromise = this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'stakereqs', process.env.AIRCLAIM_CONFIGURATION_CONTRACT, { 'limit': 100 })
 
     var bcXPRBalancePromise = null
     var bcUnstakingPromise = null
@@ -265,6 +253,7 @@ async logout() {
     var bcFreeosBalancePromise = null
     var bcAirkeyBalancePromise = null
     var bcUserPromise = null
+    var bcCurrentExchangeRatePromise = null;
     var stakeCurrency = process.env.STAKING_CURRENCY || 'XPR'
     var currencyName = process.env.CURRENCY_NAME || 'FREEOS'
 
@@ -277,7 +266,7 @@ async logout() {
 
       bcUserPromise = this.getUserRecord(process.env.AIRCLAIM_CONTRACT, 'users')
       // {"rows":[{"balance":"24920.0000 XPR"}],"more":false,"next_key":""}
-      bcXPRBalancePromise = this.getUserRecordAsNumber(process.env.CURRENCY_CONTRACT, 'accounts', {
+      bcXPRBalancePromise = this.getUserRecordAsNumber(process.env.STAKING_CURRENCY_CONTRACT, 'accounts', {
         upper_bound: stakeCurrency,
         lower_bound: stakeCurrency,
         limit: 1
@@ -289,13 +278,13 @@ async logout() {
         lower_bound: this.walletUser.accountName
       })
       optionsPromise = this.getUserRecordAsNumber(process.env.AIRCLAIM_CONTRACT, 'accounts', {
-        upper_bound: 'OPTION',
-        lower_bound: 'OPTION',
+        upper_bound: process.env.TOKEN_CURRENCY_NAME,
+        lower_bound: process.env.TOKEN_CURRENCY_NAME,
         limit: 1
       }, 'balance')
       bcVestaccountsPromise = this.getUserRecordAsNumber(process.env.AIRCLAIM_CONTRACT, 'vestaccounts', {
-        upper_bound: 'OPTION',
-        lower_bound: 'OPTION',
+        upper_bound: process.env.TOKEN_CURRENCY_NAME,
+        lower_bound: process.env.TOKEN_CURRENCY_NAME,
         limit: 1
       }, 'balance')
       bcFreeosBalancePromise = this.getUserRecordAsNumber(process.env.FREEOSTOKENS_CONTRACT, 'accounts', {
@@ -308,11 +297,12 @@ async logout() {
         upper_bound: 'AIRKEY',
         limit: 1
       }, 'balance')
-      dataRequests = dataRequests.concat([bcUnvestsPromise, bcUserPromise, bcXPRBalancePromise, bcUnstakingPromise, optionsPromise, bcVestaccountsPromise, bcFreeosBalancePromise, bcAirkeyBalancePromise])
+      bcCurrentExchangeRatePromise = this.getRecord(process.env.AIRCLAIM_CONFIGURATION_CONTRACT, 'exchangerate', process.env.AIRCLAIM_CONFIGURATION_CONTRACT, { 'limit':  1 })
+      dataRequests = dataRequests.concat([bcUnvestsPromise, bcUserPromise, bcXPRBalancePromise, bcUnstakingPromise, optionsPromise, bcVestaccountsPromise, bcFreeosBalancePromise, bcAirkeyBalancePromise, bcCurrentExchangeRatePromise])
     }
 
     var outputValues = await Promise.all(dataRequests) // .then((values) => {
-    let [currentIteration, bcStatistics, bcStateRequirements, bcUnvests, bcUser, bcXPRBalance, bcUnstaking, liquidOptions, vestedOptions, freeosBalance, bcAirkeyBalance] = outputValues
+    let [currentIteration, bcStatistics, bcStateRequirements, bcUnvests, bcUser, bcXPRBalance, bcUnstaking, liquidOptions, vestedOptions, freeosBalance, bcAirkeyBalance, bcCurrentExchangeRate] = outputValues
     if (!bcAirkeyBalance) bcAirkeyBalance = 0
     if (!liquidOptions) liquidOptions = 0
     if (!vestedOptions) vestedOptions = 0
@@ -347,6 +337,18 @@ async logout() {
     var userStake = 0
     var totalHolding = 0
     var reasonCannotClaim = ''
+    var currentIterationObj = iterations && iterations.currentIteration ? iterations.currentIteration : null
+    var nextIterationObj = iterations.nextIteration
+    var airclaimStatus = null
+
+    if (nextIterationObj && nextIterationObj.startStamp) {
+      airclaimStatus = "Pending"
+    } else if (currentIterationObj && currentIterationObj.iteration_number === null && nextIterationObj && nextIterationObj.iteration_number === null) {
+      airclaimStatus = "Complete"
+    } else {
+      airclaimStatus = "Running"
+    }
+
 
     if (bcUser) { // Registered
       for (var i = bcStateRequirements.length - 1; i >= 0; --i) {
@@ -368,14 +370,16 @@ async logout() {
       userEligibleToClaim = currentIterationIdx > 0 && userMeetsHoldingRequirement && userMeetsStakeRequirement && !userClaimedAlready
 
       if (!userEligibleToClaim) {
-        if (currentIterationIdx <= 0) {
+        if (airclaimStatus === 'Pending') {
           reasonCannotClaim = "<div class='text-h5 text-negative'>Airclaim Not Started</div>"
+        } else if (airclaimStatus === 'Complete') {
+          reasonCannotClaim = "<div class='text-h5 text-negative'>The Airclaim has ended</div>"
         } else if (!userMeetsHoldingRequirement) {
-          reasonCannotClaim = 'Opps! In order to Claim you need a minimum ' + iterations.currentIteration.tokens_required + " OPTIONS in your Wallet. Please <a href='/transfer'>transfer</a> an additional " + (iterations.currentIteration.tokens_required - totalHolding) + ' ' + currencyName + ' in order to Claim'
+          reasonCannotClaim = 'Oops! In order to Claim you need a minimum ' + iterations.currentIteration.tokens_required + " " + $options.filters.capitalize(process.env.TOKEN_CURRENCY_NAME) + "s in your Wallet. Please <a style='text-decoration:underline' href='/transfer'>transfer</a> an additional " + (iterations.currentIteration.tokens_required - totalHolding) + ' ' + currencyName + ' in order to Claim'
         } else if (userClaimedAlready) {
           reasonCannotClaim = '<div class="text-h5 text-primary">You have already claimed</div>'
         } else if (!userMeetsStakeRequirement) {
-          reasonCannotClaim = "<div class='text-h5 text-negative'>You must <router-link to='/stake' class='text-negative'>stake</router-link> to claim!</div>"
+          reasonCannotClaim = "<div class='text-h5 text-negative'>You must <a href='/stake' class='text-primary' style='text-decoration:underline'>stake</a> to claim!</div>"
         }
       }
     }
@@ -383,12 +387,12 @@ async logout() {
     var output = {
       currencyName: currencyName,
       liquidOptions: liquidOptions,
-      currentIteration: iterations && iterations.currentIteration ? iterations.currentIteration : null,
-      nextIteration: iterations.nextIteration,
+      currentIteration: currentIterationObj,
+      nextIteration: nextIterationObj,
       user: bcUser,
       accountName: this.walletUser.accountName,
       isAuthenticated: this.walletUser.accountName && this.walletUser.accountName !== '' ? true : false,
-      isRegistered: bcUser !== null ? true : false, 
+      isRegistered: bcUser !== null ? true : false,
       statistics: bcStatistics,
       unvests: bcUnvests,
       unvestPercentage: bcStatistics && bcStatistics.unvestpercent ? bcStatistics.unvestpercent : 0,
@@ -402,7 +406,7 @@ async logout() {
       liquidFreeos: freeosBalance,
       airkeyBalance: bcAirkeyBalance,
       allIterations: currentIteration,
-
+      airclaimStatus: airclaimStatus,
       stakeRequirement: stakeRequirement,
       userHasStaked: userHasStaked,
       userClaimedAlready: userClaimedAlready,
@@ -411,7 +415,9 @@ async logout() {
       totalFreeos: totalHolding,
       canClaim: userEligibleToClaim,
 
-      reasonCannotClaim: reasonCannotClaim
+      reasonCannotClaim: reasonCannotClaim,
+      currentPrice: bcCurrentExchangeRate && bcCurrentExchangeRate.currentprice ? (bcCurrentExchangeRate.currentprice/1).toFixed(6) : 0,
+      targetPrice: bcCurrentExchangeRate && bcCurrentExchangeRate.targetprice ? (bcCurrentExchangeRate.targetprice/1).toFixed(6) : 0,
     }
 
     console.log('output', output)
@@ -436,7 +442,7 @@ async logout() {
     */
   }
 
-  async getUserRecordAsNumber (scopeName, tableName, additionalParams, propertyName) {
+  async getUserRecordAsNumber(scopeName, tableName, additionalParams, propertyName) {
     var obj = await this.getUserRecord(scopeName, tableName, additionalParams)
     if (obj && obj[propertyName]) {
       var s = obj[propertyName]
@@ -445,11 +451,11 @@ async logout() {
     return null
   }
 
-  async getUserRecord (scopeName, tableName, additionalParams) {
+  async getUserRecord(scopeName, tableName, additionalParams) {
     return this.getRecord(scopeName, tableName, this.walletUser.accountName, additionalParams)
   }
 
-  async getRecord (codeName, tableName, scopeName, additionalParams) {
+  async getRecord(codeName, tableName, scopeName, additionalParams) {
     // console.log('getRecord...',codeName, tableName)
 
     if (!scopeName) scopeName = codeName
@@ -482,28 +488,43 @@ async logout() {
     return null
   }
 
-  getCurrentAndNextIteration (rows) {
-    console.log('getCurrentAndNextIteration', rows)
-
+  getCurrentAndNextIteration(rows) {
+    console.log('rows', rows);
     const currentTimeStamp = Math.floor(Date.parse(new Date().toISOString()) / 1000); // Math.floor((new Date()).getTime() / 1000)
     var nextIteration = {
-      iteration_number: 0
+      startStamp: null,
+      iteration_number: null
     }
-    var currentIteration = null
+    var currentIteration = {
+      iteration_number: null
+    }
 
     if (rows && rows.length) {
+
+      //check start
+      const firstStartTimeStamp = Math.floor(Date.parse(rows[0].start + "Z") / 1000);
+      if (currentTimeStamp < firstStartTimeStamp) {
+        nextIteration = rows[0]
+        nextIteration.startStamp = firstStartTimeStamp;
+
+        return {
+          currentIteration,
+          nextIteration
+        }
+      }
+
       rows.map((row, index) => {
         const startTimeStamp = Math.floor(Date.parse(row.start + "Z") / 1000);
         const endTimeStamp = Math.floor(Date.parse(row.end + "Z") / 1000);
 
         // console.log('startTimeStamp', startTimeStamp);
 
+
+
         if (currentTimeStamp > startTimeStamp && currentTimeStamp < endTimeStamp) {
           currentIteration = rows[index]
           if (rows.length !== (index + 1)) {
             nextIteration = rows[index + 1]
-          } else {
-            nextIteration = null
           }
         }
       })

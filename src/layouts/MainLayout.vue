@@ -8,15 +8,16 @@
           <div></div>
         </q-btn>
         <div style="display: flex; align-items: center;margin-top:-3px;">
-          <span class="q-mr-sm">v{{appVersion}}</span> <q-btn style="margin-right:-6px;" no-caps @click="accountURL()"  v-if="isAuthenticated">{{accountName}}</q-btn><span style="height:10px;border-right:1px solid #eee;"></span><q-btn  style="margin-left:-6px;" no-caps v-if="isAuthenticated" @click="logoutSubmit()">Logout</q-btn>
+          <span class="q-mr-sm">v{{appVersion}}</span><q-btn style="margin-right:-6px;margin-left:-6px;" no-caps @click="accountURL()"  v-if="isAuthenticated">{{accountName}}</q-btn><span style="height:10px;border-right:1px solid #eee;"></span><q-btn style="margin-right:-6px;margin-left:-6px;" no-caps v-if="isAuthenticated" @click="logoutSubmit()">Logout</q-btn>
         </div>
       </q-toolbar>
     </q-header>
 
     <q-drawer
       v-model="drawer"
+      :persistent="isPersist"
       :width="220"
-      :breakpoint="800"
+      show-if-above
       bordered
       overlay
       content-class="bg-grey-0"
@@ -30,7 +31,7 @@
         <q-list>
          <q-separator />
           <template v-for="(menuItem, index) in menuList">
-            <q-item v-if="!handleFunctionCall(menuItem.displayCondition)" :key="index" clickable :active="selectedItemLabel === menuItem.label" active-class="bg-grey-4" v-ripple @click="onSelectMenu(menuItem)">
+            <q-item v-if="handleFunctionCall(menuItem.displayCondition)" :key="index" clickable :active="selectedItemLabel === menuItem.label" active-class="bg-grey-4" v-ripple @click="onSelectMenu(menuItem)">
                 <q-item-section avatar style="    align-items: center;">
                   <!-- <q-icon :name="menuItem.icon" /> -->
                   <img :src="menuItem.icon" alt="menu-icon">
@@ -83,9 +84,9 @@ const menuList = [
   },
   {
     icon: require('@/assets/convert.svg'),
-    label: 'Convert Options',
+    label: 'Mint',
     separator: true,
-    route: '/convert-options'
+    route: '/mint'
   },
   {
     icon: require('@/assets/stack.svg'),
@@ -102,9 +103,9 @@ const menuList = [
   },
   {
     icon: require('@/assets/proton.svg'),
-    label: 'Proton Swap',
+    label: 'Alcor',
     separator: true,
-    route: 'https://www.protonswap.com/swap'
+    route: 'https://proton.alcor.exchange/'
   },
   {
     icon: require('@/assets/info.svg'),
@@ -119,11 +120,12 @@ export default {
       isShowDrawerButton: false,
       drawer: false,
       selectedItemLabel: null,
+      isPersist: this.$q.screen.width < 1023?false:true,
       menuList
     }
   },
   computed: {
-    ...mapGetters('freeos', ['user', 'isAuthenticated', 'accountName', 'stakeRequirement', 'isFreeosEnabled', 'userHasStaked', 'userStake']),
+    ...mapGetters('freeos', ['user', 'isAuthenticated', 'accountName', 'stakeRequirement', 'isFreeosEnabled', 'userHasStaked', 'userStake','airkeyBalance']),
     appVersion: function () {
       return process.env.APP_VERSION
     },
@@ -140,10 +142,11 @@ export default {
         if(functionName)
           return this[functionName]()
         else
-          return false
+          return true
     },
     showStake: function () {
-       return this.stakeRequirement === 0 || (this.userHasStaked && this.userStake === 0)
+      //(!this.userHasStaked && !this.airkeyBalance)
+       return (!this.userHasStaked && !this.airkeyBalance) || this.userStake > 0
     },
     accountURL (){
       window.open(process.env.ACCOUNT_URL + this.accountName, '_blank');
@@ -191,6 +194,8 @@ export default {
 </script>
 
 <style lang="scss">
+$panel-border-radius: 8px;
+$panel-width: 360px;
 
   .page-container-main{
       background: url('../assets/bluebg.svg') center -50px no-repeat;
@@ -225,8 +230,6 @@ export default {
       background: rgba(0, 0, 0, 0.05);
   }
 
-$panel-border-radius: 8px;
-$panel-width: 360px;
 
 .hide {
     display: none !important;

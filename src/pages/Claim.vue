@@ -20,7 +20,9 @@
                     interest in the Freeos AirClaim.
                     It’s just a press of a button.</p>
 
-                <p class="text-body2">By connecting you accept Freeos’s <a class="cursor-pointer" style="text-decoration:underline" @click="toggleTerms()">Terms of Service</a></p>
+             <q-checkbox id="termsCheckbox" v-model="termsCheckbox" /><label  for="termsCheckbox">I accept Freeos's <a target="_blank" href="https://www.freedao.io/t-cs" class="cursor-pointer" style="text-decoration:underline">Terms of Service</a></label>
+
+
                 <div v-show="showTerms" class="" style="width:100%;max-height:120px;overflow-y: auto;" class="text-left">
                     <p class="text-body1"><strong>Freeos Terms of Service</strong></p>
                     <p class="text-body2">Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum </p>
@@ -31,14 +33,17 @@
             </q-card-section>
 
             <q-card-actions align="center">
-                <q-btn unelevated size="lg" class="q-mb-m" outline color="primary" @click="registerUser()">Register</q-btn>
+                <q-btn :disabled="!termsCheckbox" unelevated size="lg" class="q-mb-m" outline color="primary" @click="registerUser()">Register</q-btn>
             </q-card-actions>
         </q-card>
     </q-dialog>
 
     <CompleteDialog  ref="complete"  />
-    <div class="add-bg">
+    <div class="add-bg q-px-md">
         <svg v-if="airkeyBalance > 0 && showAirkey" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:36px;" viewBox="0 0 100 100"><path d="M86.776 33.97l-7.106-6.611 4.926-5.294a7.101 7.101 0 001.876-4.6c.043-1.796-.61-3.413-1.84-4.554-2.465-2.288-6.641-1.974-9.12.689L41.613 50.008c-7.916-3.722-17.394-1.937-23.437 4.547-7.612 8.179-7.153 21.027 1.023 28.642 3.784 3.521 8.658 5.436 13.797 5.436a20.11 20.11 0 0014.843-6.457 20.251 20.251 0 002.863-23.705l14.529-15.606 7.104 6.616c.291.271.677.406 1.076.401a1.502 1.502 0 001.045-.478l4.109-4.422a1.501 1.501 0 00-.076-2.119l-7.104-6.615 2.126-2.279 7.102 6.62a1.502 1.502 0 002.12-.075l4.117-4.422c.271-.291.416-.678.401-1.076a1.487 1.487 0 00-.475-1.046zm-5.214 3.4l-7.101-6.619a1.5 1.5 0 00-2.119.074l-4.173 4.474a1.502 1.502 0 00.075 2.121l7.105 6.617-2.066 2.224-7.104-6.615a1.455 1.455 0 00-1.076-.401 1.5 1.5 0 00-1.044.477L47.986 56.985l-.015.01a1.5 1.5 0 00-.42 2.051 17.252 17.252 0 01-1.907 21.085 17.133 17.133 0 01-12.015 5.49c-4.592.152-9.007-1.478-12.385-4.62-6.966-6.487-7.357-17.435-.873-24.402a17.283 17.283 0 0112.651-5.51c2.812 0 5.647.688 8.245 2.106a1.5 1.5 0 002.038-.604l34.4-36.948c1.35-1.448 3.63-1.698 4.884-.535.591.548.903 1.359.882 2.284a4.056 4.056 0 01-1.074 2.628l-5.947 6.392a1.499 1.499 0 00.078 2.12l7.106 6.611-2.072 2.227z"/><path d="M32.999 61.242a6.964 6.964 0 00-4.923 2.135 6.964 6.964 0 00-1.973 4.989c.063 3.826 3.196 6.896 7.009 6.896l.116-.001a6.967 6.967 0 004.923-2.134 6.97 6.97 0 001.972-4.99c-.031-1.872-.789-3.621-2.135-4.923s-3.117-1.962-4.989-1.972zm2.997 9.798a3.985 3.985 0 01-2.816 1.221l-.067.001a4.016 4.016 0 01-4.01-3.944 3.981 3.981 0 011.128-2.854 3.987 3.987 0 012.817-1.221l.067-.001c1.046 0 2.034.399 2.788 1.129a3.979 3.979 0 011.221 2.815 3.98 3.98 0 01-1.128 2.854z"/></svg>
+        
+        <p class="text-body3 q-mb-xs">FREEOS price xUSDC ${{currentPrice}} <q-icon v-if="currentPrice >= targetPrice" size='xs' name="arrow_upward" /><q-icon v-if="currentPrice < targetPrice" size='xs' name="arrow_downward" /></p>
+
 
         <div v-if="!isFreeosEnabled">
             <b>Freeos system is not currently operational. Please check back later.</b>
@@ -47,12 +52,12 @@
             <div class="panel-wrap panel-top-total q-pt-lg" v-if="isFreeosEnabled">
                 <div class="row">
                     <div class="col">
-                        <p class="text-subtitle1 q-mb-xs" style="line-height:1;"><strong>OPTIONS</strong></p>
+                        <p class="text-subtitle1 q-mb-xs" style="line-height:1;"><strong>{{tokenCurrencyName}}s</strong></p>
                         <p class="text-bold text-h4" style="line-height:1;letter-spacing:-2px;">{{liquidOptions}}</p>
                     </div>
                     <div class="col" style="max-width:40px;">
-                        <router-link class="convert-btn" v-if="liquidOptions > 0" to="/convert-options">
-                            <small>Convert</small>
+                        <router-link class="convert-btn" v-if="liquidOptions > 0" to="/mint">
+                            <small>Mint</small>
                                 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
                                     <path d="M14,12.6H1.5c-0.4,0-0.7-0.3-0.7-0.7c0-0.4,0.3-0.7,0.7-0.7H14c0.4,0,0.7,0.3,0.7,0.7C14.7,12.3,14.4,12.6,14,12.6z" />
                                     <path d="M10.6,16c-0.2,0-0.3-0.1-0.5-0.2c-0.3-0.3-0.3-0.7,0-0.9l3-3l-3-3c-0.3-0.3-0.3-0.7,0-0.9c0.3-0.3,0.7-0.3,0.9,0l3.5,3.5
@@ -73,8 +78,8 @@
             <div class="flex justify-between add-custome-width">
 
                 <div class="flex column text-left"  style="flex:1">
-                    <div class="text-subtitle1">Iteration</div>
-                    <div style="background: none; border: none; outline: none;  padding-right: 0; text-align: left;line-height:1;" class="text-subtitle1 text-capitalize">
+                    <div v-if="airclaimStatus !== 'Complete'" class="text-subtitle1 q-mt-xs q-mb-xs">Iteration</div>
+                    <div style="background: none; border: none; outline: none;  padding-right: 0; text-align: left;line-height:1;" class="q-mt-xs q-mb-xs text-subtitle1 text-capitalize">
                             <strong>{{notes}}</strong>
                     </div>
                 </div>
@@ -95,7 +100,7 @@
                         </q-icon>
                         <div class="claim-text">
                         <h4 style="line-height: 1; margin: 0;">CLAIM</h4>
-                        <p  style="line-height: 1; margin: 0;"><small style="font-size:90%;">Your Freeos<br/>Options</small></p>
+                        <p  style="line-height: 1; margin: 0;"><small style="font-size:90%;">Your Freeos<br/>{{tokenCurrencyName}}s</small></p>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84" class="claim-btn-logo"><path d="M42.1.4C19.1.4.4 19.1.4 42.1s18.7 41.7 41.7 41.7 41.7-18.7 41.7-41.7S65.2.4 42.1.4zM27.3 69c-2.7 0-5.3-1-7.3-2.8C6.7 54 5.8 33.3 18 19.9c6.2-6.7 15-10.5 24.1-10.5 1.7 0 3.4.1 5.1.4h.2c-5.6 2.3-9.7 7.5-10.6 13.5-.1.6-.2 1.3-.2 1.9v1.2c-.1 4.1.1 8.2.6 12.3l-10.6 3.9c-.7.3-1.1 1.1-.8 1.8l.5 1.2c1.4 4 5.8 6 9.8 4.6.4-.2.9-.4 1.3-.6l1-.6.3-.2v.4c.2 3 .1 6-.2 9h-.1c0 .3 0 .6-.1 1-.1.6-.2 1.2-.4 1.8-1.4 4.8-5.7 8-10.6 8zm14.8 5.9c-1.8 0-3.7-.2-5.5-.5 6-2.5 10.1-8 10.8-14.5.7-5.4.7-10.9-.1-16.3l10.8-6.4c1.2-.7 1.7-2.2 1.2-3.5l-.1-.3c-.5-1.4-2-2.1-3.4-1.6l-9.5 3.6-.2.1v-.1c-.4-2.8-.5-5.7-.4-8.5.4-8.3 5.3-11.7 11.3-11.6 2.5.1 4.8.9 6.8 2.4.5.4.9.8 1.4 1.3 12.8 12.6 12.9 33.3.2 46.2-6.2 6.2-14.5 9.7-23.3 9.7z" fill="#ffffff" /></svg>
                     </div>
@@ -103,8 +108,10 @@
                 </div>
 
                 <div class="flex column text-right"  style="flex:1">
-                    <div class="text-subtitle1">Next Claim</div>
-                    <div style="background: none; border: none; outline: none;  padding-right: 0; text-align: right;line-height:1;" class="text-subtitle1">
+                    <div v-if="airclaimStatus !== 'Complete' && nextIteration && nextIteration.iteration_number !== null && nextIteration.iteration_number >= 0" class="text-subtitle1  q-mt-xs q-mb-xs">Next Claim</div>
+                    <div v-if="airclaimStatus !== 'Complete' && nextIteration && nextIteration.iteration_number === null" class="text-subtitle1">Final Claim<br />ends in</div>
+
+                    <div style="background: none; border: none; outline: none;  padding-right: 0; text-align: right;line-height:1;" class="text-subtitle1  q-mt-xs q-mb-xs">
                             <strong>{{nextClaimDescription}}</strong>
                     </div>
                 </div>
@@ -112,7 +119,7 @@
 
             <div class="flex justify-center text-center" style="align-items:center;height:80px;margin-top:-4px;">
                 <div class="text-h6" style="line-height:1.25" v-if="canClaim">
-                    <a class="text-primary" style="cursor:pointer;text-decoration:underline" @click="startClaim()" v-if="canClaim">Claim now</a> to get your weekly OPTIONS
+                    <a class="text-primary" style="cursor:pointer;text-decoration:underline" @click="startClaim()" v-if="canClaim">Claim now</a> to get your weekly {{tokenCurrencyName}}s
                 </div>
                 <div v-if="!canClaim" v-html="reasonCannotClaim">
                 </div>
@@ -122,7 +129,7 @@
         </div>
     </div>
 
-    <div v-if="isFreeosEnabled">
+    <div class="q-px-md" v-if="isFreeosEnabled">
         <!-- <balance class="col-xs-12 col-md-5 row text-left" /> -->
         <balance />
     </div>
@@ -189,10 +196,12 @@ export default {
     data() {
         return {
             showCompleteDialog: false,
-            dialogTitle: "WAHOO!", 
+            termsCheckbox:false,
+            dialogTitle: "", 
             dialogSubtitle: null, 
             dialogValue: null,
-            dialogCurrency: process.env.CURRENCY_NAME + ' OPTIONS', 
+            tokenCurrencyName: this.$options.filters.capitalize(process.env.TOKEN_CURRENCY_NAME),
+            dialogCurrency: process.env.CURRENCY_NAME + ' ' + this.$options.filters.capitalize(process.env.TOKEN_CURRENCY_NAME), 
             stakeCurrency: process.env.STAKING_CURRENCY,
             currencyName: process.env.CURRENCY_NAME,
             registerModalOverride: true,
@@ -206,7 +215,7 @@ export default {
         CompleteDialog
     },
     computed: {
-        ...mapGetters('freeos', ['isRegistered', 'isFreeosEnabled', 'totalFreeos', 'liquidFreeos', 'liquidOptions', 'canClaim', 'reasonCannotClaim', 'currentIteration', 'airkeyBalance']),
+        ...mapGetters('freeos', ['isRegistered', 'isFreeosEnabled', 'totalFreeos', 'liquidFreeos', 'liquidOptions', 'canClaim', 'reasonCannotClaim', 'currentIteration', 'nextIteration', 'airkeyBalance', 'airclaimStatus', 'currentPrice', 'targetPrice']),
         nextClaimDescription: function () {
             const dateEnd = new Date(`${this.currentIteration.end}Z`) // Z = zero UTC offset
             const currentTimeStamp = Date.now()
@@ -220,7 +229,6 @@ export default {
                 return (this.isRegistered === false && this.registerModalOverride === true)
             },
             async set (value) {
-                console.log(value);
                 this.registerModalOverride = value;
                 if(this.isRegistered === false){
                     console.log("LOGOUT");
@@ -232,9 +240,6 @@ export default {
     methods: {
         ...mapActions('freeos', ['fetch', 'register', 'claim']),
         ...mapActions('account', ['logout']),
-        toggleTerms(){
-            this.showTerms = !this.showTerms;
-        },
         async registerUser() {
             await this.register()
             //await this.fetch()
@@ -245,7 +250,7 @@ export default {
                 var result = await _.claim()
                 if(!(result instanceof Error)){
                     this.$refs.complete.openDialog({
-                            title: "Wahoo!", subtitle: "You earned", value: this.currentIteration.claim_amount
+                            title: "Woohoo", subtitle: "You earned", value: this.currentIteration.claim_amount
                      });
                 } 
             }
@@ -328,7 +333,8 @@ $panel-width: 360px;
 
 .add-bg {
     position: relative;
-    padding: 10px 0;
+    padding-top: 10px;
+    padding-bottom:10px;
 
     &:after {
         content: "";
@@ -375,8 +381,11 @@ $panel-width: 360px;
         height: 150px;
         background: #fff;
         border-radius: 8px;
-        padding: 10px 20px;
-
+        padding: 10px 16px;
+            .text-subtitle1{
+                font-size:.95rem;
+                line-height: 1;
+            }
         .custome-width {
             flex-direction: row;
         }
@@ -385,8 +394,8 @@ $panel-width: 360px;
             position: relative;
             background-color: #cccccc;
              box-shadow:none;
-                border: 5px solid #fff;
-            margin: -4.5rem -10px 0;
+                border: 4px solid #fff;
+            margin: -4.5rem -25px 0;
             /* margin-left:  35px; */
             opacity: .9;
             width: 8rem;

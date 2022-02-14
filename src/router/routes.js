@@ -17,7 +17,7 @@ const routes = [
       { path: '/stake', component: () => import('pages/StakeAndUnstake.vue') },
       { path: '/re-register', component: () => import('pages/Re-register.vue') },
       { path: '/transfer', component: () => import('pages/Transfer.vue') }, 
-      { path: '/convert-options', component: () => import('pages/ConvertOptions.vue') },
+      { path: '/mint', component: () => import('pages/ConvertOptions.vue') },
       { path: '/debug', component: () => import('pages/Debug.vue') },
       { path: '/info', component: () => import('pages/Info.vue') }
     ]

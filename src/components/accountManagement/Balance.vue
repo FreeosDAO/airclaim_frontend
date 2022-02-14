@@ -1,7 +1,7 @@
 <template>
 <div>
-    <div class="balance q-pt-lg q-pl-lg q-pr-lg q-pb-xs">
-        <div class="flex justify-between q-mb-md" style="width: 100%">
+    <div class="balance q-pt-lg q-pl-md q-pr-md q-pb-xs">
+        <div v-if="(!this.userHasStaked && !this.airkeyBalance) || this.userStake > 0" class="flex justify-between q-mb-md" style="width: 100%">
             <div class="flex items-center text-h6">
                 Liquid {{stakeCurrency}}:
                 <q-btn class="small-icon q-mt-sm q-ml-sm">
@@ -14,7 +14,7 @@
             <div class=" text-h6">{{XPRBalance || '0'}}</div>
         </div>
 
-        <div v-if="!(this.stakeRequirement === 0 || (this.userHasStaked && this.userStake === 0))" class="flex justify-between q-mb-md">
+        <div v-if="(!this.userHasStaked && !this.airkeyBalance) || this.userStake > 0" class="flex justify-between q-mb-md">
             <div class="flex items-center text-h6">
                 Staked {{stakeCurrency}}:                 
                 <q-btn class="small-icon q-mt-sm q-ml-sm">
@@ -26,19 +26,13 @@
             <div class="text-h6">{{userStake || '0'}}</div>
         </div>
 
-        <!--<div class="flex justify-between q-mb-md">
-        <div class="flex items-center text-subtitle1 text-weight-bold" style="color: #00a1ed">
-          <span class="small-icon"></span>
-          Liquid Options: </div>
-        <div class="col-5 text-primary text-weight-bold">{{liquidOptions || '0'}}</div>
-      </div>-->
 
         <div class="flex justify-between q-mb-md">
             <div class="flex items-center  text-h6">
-               Locked OPTIONS:
+               Locked {{tokenCurrencyName}}s:
             </div>
             <div class="col-5 text-h6">{{vestedOptions || '0'}}</div>
-            <div class="flex"><small class="q-mr-auto">For more info on Locked OPTIONS <router-link to="/info#vested-options">click here</router-link></small></div>
+            <div class="flex"><small class="q-mr-auto">For more info on Locked {{tokenCurrencyName}}s <router-link to="/info#vested-options">click here</router-link></small></div>
             <q-btn :disable="!canUnvest || !vestedOptions" class="q-mt-lg" unelevated no-caps size="lg" outline @click="submit()" color="primary"><span>Unlock<span v-if="unvestPercentage && canUnvest && vestedOptions"> {{unvestPercentage}}%</span></span></q-btn>
         </div>
 
@@ -60,13 +54,15 @@ export default {
     data() {
         return {
             stakeCurrency: process.env.STAKING_CURRENCY,
-            currencyName: process.env.CURRENCY_NAME
+            currencyName: process.env.CURRENCY_NAME,
+            tokenCurrencyName: this.$options.filters.capitalize(process.env.TOKEN_CURRENCY_NAME),
         }
     },
     computed: {
-        ...mapGetters('freeos', ['XPRBalance', 'liquidOptions', 'userStake', 'liquidFreeos', 'totalFreeos', 'canUnvest', 'vestedOptions', 'stakeRequirement', 'unvestPercentage', 'userHasStaked', 'userStake']),
+        ...mapGetters('freeos', ['XPRBalance', 'liquidOptions', 'userStake', 'liquidFreeos', 'totalFreeos', 'canUnvest', 'vestedOptions', 'stakeRequirement', 'unvestPercentage', 'userHasStaked', 'userStake', 'airkeyBalance']),
         unvestedAmount:function(){
-            return this.vestedOptions && this.unvestPercentage ? (this.unvestPercentage / 100) * this.vestedOptions : 0;
+            var unvestAmount = this.vestedOptions && this.unvestPercentage ? Math.ceil((this.unvestPercentage / 100) * this.vestedOptions) : 0;
+            return unvestAmount;
         }
     },
     methods: {
@@ -75,7 +71,7 @@ export default {
             var result = await this.unvest();
               if(!(result instanceof Error)){
                 this.$refs.complete.openDialog({
-                  title: "Unlocked", subtitle: "You Unlocked", value: this.unvestedAmount, currency: "OPTIONS"
+                  title: "Unlocked", subtitle: "You Unlocked", value: this.unvestedAmount, currency: this.tokenCurrencyName + "s"
                 });
               }
         },
@@ -89,14 +85,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$panel-border-radius: 8px;
+$panel-width: 360px;
 .balance {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
     margin: 15px auto;
     background-color: white;
-    border-radius: 8px;
-    width: 360px;
+    border-radius: $panel-border-radius;
+    max-width: $panel-width;
     border: 2px solid #e5e5e5;
 
     .small-icon {

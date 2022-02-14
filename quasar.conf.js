@@ -24,7 +24,8 @@ module.exports = function (ctx) {
     boot: [
       'axios',
       'transit',
-      'lodash'
+      'lodash',
+      'filters'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css

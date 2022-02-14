@@ -42,7 +42,47 @@ h5,
 .q-btn.disabled
   opacity:0.4 !important
 
-
+.q-toolbar
+  padding: 0
+  @media only screen and (min-width: 640px) 
+        padding: 0 12px
 
 .q-dialog__inner > div
     border-radius: 12px
+
+
+body .wallet-selector-tos-agreement
+      margin-top: 15px
+
+body .wallet-selector-connect-body
+       margin-top: 15px
+
+body .wallet-selector-proton-wallet, body .wallet-selector-anchor-wallet
+  border-radius:10px
+
+body .wallet-selector-logo
+    padding: 2px  
+    padding-top: 10px
+
+
+.max-btn
+  position: absolute
+  right:-8px
+  top:6px
+  width:36px
+  height:28px
+  padding: 0
+  .q-btn__wrapper
+      padding: 2px 1px 3px
+
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button 
+  -webkit-appearance: none
+  margin: 0
+
+
+/* Firefox */
+input[type=number] 
+  -moz-appearance: textfield
