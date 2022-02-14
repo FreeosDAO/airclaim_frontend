@@ -1,10 +1,10 @@
-import ProtonWebSDK from '@proton/web-sdk'
+import { ConnectWallet } from '@proton/web-sdk'
 import {
   FreeosBlockChainState
 } from '../services/FreeosBlockChainState'
 
 class ProtonSDK {
-  constructor () {
+  constructor() {
     this.chainId = process.env.NETWORK_CHAIN_ID
     this.endpoints = process.env.APP_CHAIN_ENDPOINT.split(", "); // Multiple for fault tolerance
     this.appName = 'Freeos'
@@ -16,7 +16,7 @@ class ProtonSDK {
   connect = async (restoreSession) => {
     console.log('login', this.options)
     try {
-      const { link, session } = await ProtonWebSDK({
+      const { link, session } = await ConnectWallet({
         linkOptions: {
           chainId: this.chainId,
           endpoints: this.endpoints,
@@ -56,7 +56,7 @@ class ProtonSDK {
     console.log('login', this.options)
     try {
       await this.connect(false);
-      return { auth: this.session.auth};
+      return { auth: this.session.auth };
     } catch (e) {
       console.error(e);
       return e;
@@ -83,7 +83,7 @@ class ProtonSDK {
   };
 
   logout = async () => {
-    console.log('this.requestAccount',this.requestAccount);
+    console.log('this.requestAccount', this.requestAccount);
     if (this.session && this.session.auth) await this.link.removeSession(this.requestAccount, this.session.auth)
     await FreeosBlockChainState.getInstance().singleFetch();
   }
@@ -94,9 +94,9 @@ class ProtonSDK {
       if (this.session) {
         return { auth: this.session.auth };
       } else {
-        return { auth: { actor: '', permission: '' }};
+        return { auth: { actor: '', permission: '' } };
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       return e;
     }
