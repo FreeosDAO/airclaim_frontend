@@ -85,9 +85,10 @@
                 </div>
 
 
-                <div class="wrap-avatar" v-bind:class="{'enable-btn': canClaim}">
-                    <div class="avatar claim-btn" @click="startClaim()">
-                        <q-icon size="md" style="margin-top: -0px; margin-bottom: 2px;" v-bind:class="{'hide': canClaim}">
+
+                <div class="wrap-avatar">
+                    <div class="avatar" @click="canClaim ? startClaim() : null" :class="canClaim ? 'claim-btn' : 'claim-btn-off disable-btn'">
+                        <q-icon size="md" style="margin-top: -50px; margin-bottom: 15px;" :class="{'hide': canClaim}">
                             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
                                         <path fill="#ffffff" d="M501.362,383.95L320.497,51.474c-29.059-48.921-99.896-48.986-128.994,0L10.647,383.95
                       c-29.706,49.989,6.259,113.291,64.482,113.291h361.736C495.039,497.241,531.068,433.99,501.362,383.95z M256,437.241
@@ -216,13 +217,9 @@ export default {
     computed: {
         ...mapGetters('freeos', ['isRegistered', 'isFreeosEnabled', 'totalFreeos', 'liquidFreeos', 'liquidOptions', 'canClaim', 'reasonCannotClaim', 'currentIteration', 'nextIteration', 'airkeyBalance', 'airclaimStatus', 'currentPrice', 'targetPrice']),
         nextClaimDescription: function () {
-            var daysToNextClaim = "";
-            if(this.currentIteration && this.currentIteration.end){
-                const dateEnd =  Math.floor(Date.parse(this.currentIteration.end + "Z") / 1000);
-                const currentTimeStamp = Math.floor(Date.parse(new Date().toISOString()) / 1000);
-                daysToNextClaim = this.secondsToDhms(dateEnd - currentTimeStamp);
-            }
-            return daysToNextClaim
+            const dateEnd = new Date(`${this.currentIteration.end}Z`) // Z = zero UTC offset
+            const currentTimeStamp = Date.now()
+            return this.secondsToDhms((dateEnd - currentTimeStamp) / 1e3);
         },
         notes: function () {
             return this.currentIteration && this.currentIteration.iteration_number ? ('Week ' + this.currentIteration.iteration_number) : ''
@@ -259,28 +256,20 @@ export default {
             }
         },
         secondsToDhms(seconds) {
-            seconds = Number(seconds);
-            var d = Math.floor(seconds / (3600 * 24));
-            var h = Math.floor(seconds % (3600 * 24) / 3600);
-            var m = Math.floor(seconds % 3600 / 60);
-            var s = Math.floor(seconds % 60);
+            const d = Math.floor(seconds / (3600 * 24));
+            const h = Math.floor(seconds % (3600 * 24) / 3600);
+            const m = Math.floor(seconds % 3600 / 60);
 
-            var dDisplay = d > 0 ? d + (d == 1 ? "day" : "days") : "";
-            var hDisplay = h > 0 ? h + (h == 1 ? "hr" : "hrs") : "";
-            var mDisplay = m > 0 ? m + (m == 1 ? "min" : "mins") : "";
+            const dDisplay = d ? `${d} day${d !== 1 ? "s" : ""}` : "";
+            const hDisplay = h ? `${h} hr${h !== 1 ? "s" : ""}` : "";
+            const mDisplay = m ? `${m} min${m !== 1 ? "s" : ""}` : "";
 
-            if(dDisplay && hDisplay){
-                return dDisplay + ", " + hDisplay
-            }else if(hDisplay){
-                return hDisplay + ", " + mDisplay
-            }else if(dDisplay){
-               return dDisplay
-            }else{
-               return "0hrs, " + mDisplay
-            }
+            let timeToNextClaim = "";
+            if(dDisplay) timeToNextClaim = dDisplay;
+            if(hDisplay) timeToNextClaim = timeToNextClaim + (dDisplay ? ", " : "") + hDisplay;
+            if(mDisplay && !dDisplay) timeToNextClaim = timeToNextClaim + (hDisplay ? ", " : "") + mDisplay;
+            return timeToNextClaim;
         }
-
-
     },
     async created () {
 
@@ -318,6 +307,12 @@ $panel-width: 360px;
 .claim-btn{
     .st0{fill:#FFFFFF;}
 }
+
+.claim-btn-off{
+    cursor:not-allowed;
+    .st0{fill:#FFFFFF;}
+}
+
 .claim-text{
     color:#fff;
     position: relative;
@@ -325,6 +320,7 @@ $panel-width: 360px;
     opacity:.7;
     flex-direction: column;
 }
+
 .claim-btn-logo{
     position: absolute;
     left:50%;
@@ -334,6 +330,7 @@ $panel-width: 360px;
     opacity: .15;
     transform: translate(-50%,-50%);
 }
+
 .add-bg {
     position: relative;
     padding-top: 10px;
