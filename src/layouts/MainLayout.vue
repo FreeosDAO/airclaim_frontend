@@ -36,7 +36,7 @@
                   <!-- <q-icon :name="menuItem.icon" /> -->
                   <img :src="menuItem.icon" alt="menu-icon" class="menu-icon">
                 </q-item-section>
-                <q-item-section class="text-subtitle1">
+                <q-item-section class="text-subtitle1 lhs">
                    <strong>{{ menuItem.label }}</strong>
                 </q-item-section>
             </q-item>
@@ -119,6 +119,12 @@ const menuList = [
     label: 'Auctions',
     separator: true,
     route: 'https://auction.freeos.io'
+  },
+    {
+    icon: require('@/assets/snipcoins.svg'),
+    label: 'Snipcoins Community',
+    separator: true,
+    route: 'https://snipcoins.com/Freeos_Chat'
   },
   {
     icon: require('@/assets/info.svg'),
