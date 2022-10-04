@@ -13,7 +13,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@proton/web-sdk": "^4.1.0",
+    "@proton/web-sdk": "^4.1.11",
     "@quasar/extras": "^1.0.0",
     "@quasar/quasar-app-extension-dotenv": "^1.0.5",
     "axios": "^0.21.1",
